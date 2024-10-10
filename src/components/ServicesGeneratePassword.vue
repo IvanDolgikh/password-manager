@@ -2,31 +2,44 @@
     <div class="generate-password">
         <div class="generate-password__container">
 
-            <label>
-                <input type="number" v-model="passwordLength" min="1" placeholder="Длинна пароля">
-            </label>
+            <div class="generate-password__helper">
+                <label>
+                    <input type="number" :disabled="useOwnSymbols" v-model="passwordLength" min="1"
+                        placeholder="Длинна пароля">
+                </label>
+
+                <label>
+                    <input type="checkbox" :disabled="useOwnSymbols" v-model="useLetters">
+                    <span>Буквы</span>
+                </label>
+
+                <label>
+                    <input type="checkbox" :disabled="useOwnSymbols" v-model="useNumbers">
+                    <span>Цифры</span>
+                </label>
+
+                <label>
+                    <input type="checkbox" :disabled="useOwnSymbols" v-model="useSymbols">
+                    <span>Спецсимволы</span>
+                </label>
+
+                <label>
+                    <input type="checkbox" v-model="useOwnSymbols">
+                    <span>Свой набор символов</span>
+                </label>
+
+                <label>
+                    <select class="generate-password__select" :disabled="useOwnSymbols" v-model="caseType">
+                        <option value="lowercase">Нижний регистр</option>
+                        <option value="uppercase">Верхний регистр</option>
+                        <option value="random">Случайный</option>
+                    </select>
+                </label>
+            </div>
+
 
             <label>
-                <input type="checkbox" v-model="useLetters">
-                <span>Буквы</span>
-            </label>
-
-            <label>
-                <input type="checkbox" v-model="useNumbers">
-                <span>Цифры</span>
-            </label>
-
-            <label>
-                <input type="checkbox" v-model="useSymbols">
-                <span>Спецсимволы</span>
-            </label>
-
-            <label>
-                <select class="generate-password__select" v-model="caseType">
-                    <option value="lowercase">Нижний регистр</option>
-                    <option value="uppercase">Верхний регистр</option>
-                    <option value="random">Случайный</option>
-                </select>
+                <input type="text" v-model="ownSymbols" placeholder="Свой набор символов" :disabled="!useOwnSymbols">
             </label>
 
             <button @click="generatePassword">Сгенерировать пароль</button>
@@ -42,14 +55,20 @@ const passwordLength = ref<number>(12);
 const useLetters = ref<boolean>(true);
 const useNumbers = ref<boolean>(true);
 const useSymbols = ref<boolean>(true);
+const useOwnSymbols = ref<boolean>(false)
+const ownSymbols = ref<string>('')
 const caseType = ref('random');
 
 const generatedPassword = ref<string>('');
 
 const emit = defineEmits(['getPassword'])
 
-const generatePassword = () => {
-    generatedPassword.value = generatePasswordFromSettings();
+const generatePassword = (): void => {
+    if (useOwnSymbols.value) {
+        generatedPassword.value = generatePasswordFromSymbols()
+    } else {
+        generatedPassword.value = generatePasswordFromSettings();
+    }
     emit('getPassword', generatedPassword.value)
 };
 
@@ -74,6 +93,9 @@ const generatePasswordFromSettings = (): string => {
     return password;
 };
 
+const generatePasswordFromSymbols = () => {
+    return ownSymbols.value.split('').sort(() => 0.5 - Math.random()).join('');
+};
 </script>
 
 <style scoped lang="scss">
@@ -82,6 +104,7 @@ const generatePasswordFromSettings = (): string => {
     &__container {
         display: flex;
         align-items: center;
+        justify-content: space-between;
         flex-wrap: wrap;
         gap: 22px 20px;
     }
@@ -94,7 +117,8 @@ const generatePasswordFromSettings = (): string => {
             font-size: 14px;
         }
 
-        input[type="number"] {
+        input[type="number"],
+        input[type="text"] {
             background-color: #82828229;
             border: none;
             color: #ffffff;
@@ -106,6 +130,14 @@ const generatePasswordFromSettings = (): string => {
             &:focus-visible {
                 outline: none;
             }
+        }
+
+        input[type="text"] {
+            padding: 4px;
+        }
+
+        input:disabled {
+            background-color: #484848;
         }
     }
 

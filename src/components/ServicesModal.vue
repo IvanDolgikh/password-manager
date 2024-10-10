@@ -65,7 +65,7 @@ const sendEmit = () => emit('closeModal', props.isOpenModal)
 
 const isSuccessRequest = ref<boolean>(false)
 const message = ref<boolean>(false)
-const isCustomChars = ref<boolean>(true);
+const isCustomChars = ref<boolean>(false);
 
 const data: IData = reactive({
     serviceName: '',
